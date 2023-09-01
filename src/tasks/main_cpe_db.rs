@@ -10,6 +10,7 @@ pub struct MainCpeDb {
 }
 
 impl MainCpeDb {
+    #[allow(unused)]
     pub fn new(dictionary: CpeList) -> Self {
         Self {
             map: Default::default(),

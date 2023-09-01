@@ -13,7 +13,7 @@ fn process_sbom(file: DirEntry) -> anyhow::Result<Option<Arc<SPDX>>> {
     let mut data = vec![];
     stream.read_to_end(&mut data)?;
 
-    log::info!(
+    log::debug!(
         "Processing {} - on disk: {}, unpacked: {}",
         file.path().display(),
         file.metadata()?.len(),

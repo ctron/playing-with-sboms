@@ -1,3 +1,4 @@
+use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use std::io::BufReader;
 
 #[derive(Clone, Debug, PartialEq, Eq, serde::Deserialize, serde::Serialize)]
@@ -31,10 +32,22 @@ pub struct CpeList {
     pub items: Vec<CpeItem>,
 }
 
-pub fn load_cpe_dictionary() -> anyhow::Result<CpeList> {
+pub fn load(multi: &MultiProgress) -> anyhow::Result<CpeList> {
+    log::info!("Loading CPE dictionary");
+
     let file = std::fs::File::open("data/official-cpe-dictionary_v2.3.xml.gz")?;
-    let decoder = flate2::read::GzDecoder::new(BufReader::new(file));
-    Ok(quick_xml::de::from_reader(BufReader::new(decoder))?)
+
+    let style = ProgressStyle::with_template("{msg:20} {wide_bar} {bytes}/{total_bytes}")?;
+    let progress = multi
+        .add(ProgressBar::new(file.metadata()?.len()).with_style(style.clone()))
+        .with_message("Loading CPE database");
+
+    let decoder = flate2::read::GzDecoder::new(BufReader::new(progress.wrap_read(file)));
+    let list: CpeList = quick_xml::de::from_reader(BufReader::new(decoder))?;
+
+    log::info!("Loaded {} definitions", list.items.len());
+
+    Ok(list)
 }
 
 impl CpeList {
