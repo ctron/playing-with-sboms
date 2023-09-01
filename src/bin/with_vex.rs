@@ -49,7 +49,9 @@ async fn run(multi: &MultiProgress) -> anyhow::Result<()> {
     let vex_cpe = mem::replace(&mut vex_cpe.map, Default::default());
     let sbom_cpe = mem::replace(&mut sbom_cpe.map, Default::default());
 
-    resolve_cpes(vex_cpe.into_keys(), sbom_cpe.into_keys());
+    let (hits, misses) = resolve_cpes(vex_cpe.into_keys(), sbom_cpe.into_keys());
+
+    println!("Hits: {hits}, Misses: {misses}");
 
     Ok(())
 }
@@ -67,7 +69,7 @@ fn fixup_cpe(cpe: String) -> String {
     }
 }
 
-fn resolve_cpes<F, T>(from: F, to: T)
+fn resolve_cpes<F, T>(from: F, to: T) -> (usize, usize)
 where
     F: IntoIterator<Item = String>,
     T: IntoIterator<Item = String>,
@@ -98,6 +100,11 @@ where
         })
         .collect::<Vec<_>>();
 
+    let mut hits = 0;
+    let mut misses = 0;
+
+    println!(r#"VEX,Num,SBOMs"#);
+
     for cpe in from {
         let targets = to
             .iter()
@@ -106,13 +113,18 @@ where
             .collect::<Vec<_>>();
 
         let level = if targets.is_empty() {
+            misses += 1;
             Level::Warn
         } else {
+            hits += 1;
             Level::Info
         };
 
-        log::log!(level, "{cpe} => [{}]", targets.join(", "));
+        //log::log!(level, "{cpe} => [{}]", targets.join(", "));
+        println!(r#""{cpe}",{},"[{}]""#, targets.len(), targets.join(" "));
     }
+
+    (hits, misses)
 }
 
 macro_rules! match_ele {
