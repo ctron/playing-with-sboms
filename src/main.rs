@@ -1,20 +1,16 @@
-mod run;
-mod tasks;
-mod utils;
-mod walker;
-
-use crate::run::run_task;
-use crate::tasks::Task;
 use indicatif::MultiProgress;
 use indicatif_log_bridge::LogWrapper;
+use playing_with_sboms::{run::run_task, tasks};
 
 fn run(multi: &MultiProgress) -> anyhow::Result<()> {
-    // run_task(multi, tasks::unique_names::UniqueNames::default())?;
-    // run_task(multi, tasks::unique_main::UniqueMainPackages::default())?;
+    // run_task(multi, &mut tasks::unique_names::UniqueNames::default())?;
+    // run_task(multi, &mut tasks::unique_main::UniqueMainPackages::default())?;
+    run_task(multi, &mut tasks::main_cpe::MainCpe::default())?;
+    /*
     run_task(
         multi,
-        tasks::main_cpe_db::MainCpeDb::new(utils::cpe_dictionary::load(multi)?),
-    )?;
+        &mut tasks::main_cpe_db::MainCpeDb::new(playing_with_sboms::utils::cpe_dictionary::load(multi)?),
+    )?;*/
     Ok(())
 }
 

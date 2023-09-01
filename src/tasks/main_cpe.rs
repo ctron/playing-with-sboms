@@ -5,7 +5,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 #[derive(Default)]
 pub struct MainCpe {
-    map: BTreeMap<String, usize>,
+    pub map: BTreeMap<String, usize>,
 }
 
 impl Task for MainCpe {
